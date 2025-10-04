@@ -1,6 +1,6 @@
 # about
 
-open audio system c++23
+open audio system c++
 
 pulse-client captured audio stream from pulseaudio and received it to alsa-server
 
