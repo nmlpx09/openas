@@ -25,17 +25,17 @@ std::error_code TPulse::Init() noexcept {
     pa_sample_format_t format;
 
     if (NumChannels != 2) {
-        return EErrorCode::DeviceInit;
+        return EErrorCode::Channels;
     }
 
     if (SampleFormat == "s32le") {
         format = PA_SAMPLE_S32LE;
     } else {
-        return EErrorCode::DeviceInit;
+        return EErrorCode::Format;
     }
 
     if (SampleRate != 48000) {
-        return EErrorCode::DeviceInit;
+        return EErrorCode::Rate;
     }
 
     Spec = {

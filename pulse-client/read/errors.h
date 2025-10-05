@@ -7,6 +7,9 @@ namespace NRead {
 enum EErrorCode {
     Ok,
     DeviceInit,
+    Channels,
+    Format,
+    Rate,
     Read
 };
 
@@ -30,6 +33,12 @@ public:
         switch (value) {
             case Ok:
                 return "ok";
+            case Channels:
+                return "channels not supported error";
+            case Format:
+                return "format not supported error";
+            case Rate:
+                return "rate not supported error";
             case DeviceInit:
                 return "device init error";
             case Read:

@@ -7,46 +7,45 @@ TAlsa::TAlsa(
     std::string device,
     std::string format,
     std::size_t channels,
-    std::size_t rate,
-    std::size_t bufferSize
+    std::size_t rate
 )
 : Device(std::move(device))
 , Format(std::move(format))
 , Channels(channels)
-, Rate(rate)
-, BufferSize(bufferSize) {
-}
+, Rate(rate) { }
 
 TAlsa::~TAlsa() {
-    snd_pcm_drain(SoundDevice);
-    snd_pcm_close(SoundDevice);
+    if (SoundDevice != nullptr) {
+        snd_pcm_drain(SoundDevice);
+        snd_pcm_close(SoundDevice);
+    }
 }
 
 std::error_code TAlsa::Init() noexcept {
     if (auto err = snd_pcm_open(&SoundDevice, Device.c_str(), SND_PCM_STREAM_PLAYBACK, 0); err < 0) {
-        return make_error_code(EErrorCode::DeviceOpen);
+        return EErrorCode::DeviceOpen;
     }
 
     snd_pcm_hw_params_alloca(&HwParams);
  
     if (auto err = snd_pcm_hw_params_any(SoundDevice, HwParams); err < 0) {
-        return make_error_code(EErrorCode::InitializeParameter);
+        return EErrorCode::InitializeParameter;
     }
 
     if (auto err = snd_pcm_hw_params_set_rate_resample(SoundDevice, HwParams, 1); err < 0) {
-        return make_error_code(EErrorCode::Resampling);
+        return EErrorCode::Resampling;
     }
 
     if (auto err = snd_pcm_hw_params_set_access(SoundDevice, HwParams, SND_PCM_ACCESS_RW_INTERLEAVED); err < 0) {
-        return make_error_code(EErrorCode::SetAccess);
+        return EErrorCode::SetAccess;
     }
 
     if (Channels > 2) {
-        return make_error_code(EErrorCode::Channels);
+        return EErrorCode::Channels;
     }
 
     if (auto err = snd_pcm_hw_params_set_channels(SoundDevice, HwParams, Channels); err < 0) {
-        return make_error_code(EErrorCode::SetChannels);
+        return EErrorCode::SetChannels;
     }
 
     snd_pcm_format_t format;
@@ -54,33 +53,33 @@ std::error_code TAlsa::Init() noexcept {
         format = SND_PCM_FORMAT_S32_LE;
         FrameSize = sizeof(std::int32_t) * Channels;
     } else {
-        return make_error_code(EErrorCode::Format);
+        return EErrorCode::Format;
     }
 
     if (auto err = snd_pcm_hw_params_set_format(SoundDevice, HwParams, format); err < 0) {
-        return make_error_code(EErrorCode::SetFormat);
+        return EErrorCode::SetFormat;
     }
 
     if (Rate != 48000) {
-        return make_error_code(EErrorCode::Rate);
+        return EErrorCode::Rate;
     }
 
     std::uint32_t rate = Rate;
     if (auto err = snd_pcm_hw_params_set_rate_near(SoundDevice, HwParams, &rate, 0); err < 0) {
-        return make_error_code(EErrorCode::SetRate);
+        return EErrorCode::SetRate;
     }
 
-    snd_pcm_uframes_t bufferSize = BufferSize;
+    snd_pcm_uframes_t bufferSize = Rate * FrameSize / 100;
     if (auto err = snd_pcm_hw_params_set_buffer_size_near(SoundDevice, HwParams, &bufferSize); err < 0) {
-        return make_error_code(EErrorCode::SetBuffer);
+        return EErrorCode::SetBuffer;
     }
 
     if (auto err = snd_pcm_hw_params(SoundDevice, HwParams); err < 0) {
-        return make_error_code(EErrorCode::SetHwParams);
+        return EErrorCode::SetHwParams;
     }
 
     if (auto err = snd_pcm_prepare(SoundDevice); err < 0) {
-        return make_error_code(EErrorCode::Prepare);
+        return EErrorCode::Prepare;
     }
 
     return {};
@@ -88,7 +87,7 @@ std::error_code TAlsa::Init() noexcept {
 
 std::error_code TAlsa::Write(TData&& data) noexcept {
     if (SoundDevice == nullptr) {
-        return make_error_code(EErrorCode::DeviceInit);
+        return EErrorCode::DeviceInit;
     }
     auto frames = data.size() / FrameSize;
 

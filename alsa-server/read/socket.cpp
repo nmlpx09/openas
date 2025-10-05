@@ -12,8 +12,7 @@ TSocket::TSocket(
     std::uint16_t port
 )
 : Ip(std::move(ip))
-, Port(port) {
-}
+, Port(port) { }
 
 TSocket::~TSocket() {
     close(Sockfd);

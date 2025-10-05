@@ -4,7 +4,7 @@
 
 namespace NUtils {
 
-bool isZero(const TData& data) {
+bool isInvalid(const TData& data) {
     if (data.size() == 0) {
         return true;
     }

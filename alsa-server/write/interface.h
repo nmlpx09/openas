@@ -10,7 +10,7 @@ namespace NWrite {
 struct TInterface {
 public:
     virtual std::error_code Init() noexcept = 0;
-    virtual std::error_code Write(TData&& data) noexcept = 0;
+    virtual std::error_code Write(TData&&) noexcept = 0;
     virtual ~TInterface() {};
 };
 

@@ -17,8 +17,7 @@ public:
         std::string device,
         std::string format,
         std::size_t channels,
-        std::size_t rate,
-        std::size_t bufferSize
+        std::size_t rate
     );
     TAlsa(const TAlsa&) = delete;
     TAlsa(TAlsa&&) noexcept = default;
@@ -34,7 +33,6 @@ private:
     std::string Format;
     std::size_t Channels = 0;
     std::size_t Rate = 0;
-    std::size_t BufferSize = 0;
     
     snd_pcm_t* SoundDevice = nullptr;
     snd_pcm_hw_params_t* HwParams = nullptr;

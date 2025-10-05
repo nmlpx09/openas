@@ -19,10 +19,26 @@ struct TContext {
 
 using TContextPtr = std::shared_ptr<TContext>;
 
+void Read(NRead::TReadPtr read, TContextPtr ctx) noexcept {
+    while (true) {
+        if (auto result = read->Read(DATASIZE); !result) {
+            std::cerr << "read error: " << result.error().message() << std::endl;
+            continue;
+        } else {
+            if (NUtils::isInvalid(result.value())) {
+                continue;
+            }
+            std::unique_lock ulock{ctx->mutex};
+            ctx->queue.emplace_back(std::move(result).value());
+        }
+        ctx->cv.notify_one();
+    }
+}
+
 void Write(NWrite::TWritePtr write, TContextPtr ctx) noexcept {
     bool dropMode = false;
     while(true) {
-        std::unique_lock<std::mutex> ulock{ctx->mutex};
+        std::unique_lock ulock{ctx->mutex};
         ctx->cv.wait(ulock, [ctx] { return !ctx->queue.empty(); });
 
         if (dropMode) {
@@ -35,43 +51,27 @@ void Write(NWrite::TWritePtr write, TContextPtr ctx) noexcept {
             dropMode = true;
         }
 
-        auto value = ctx->queue.front();
+        auto data = ctx->queue.front();
         ctx->queue.pop_front();
         ulock.unlock();
 
-        if (auto ec = write->Write(std::move(value)); ec) {
-            std::cerr << ec.message() << std::endl;
-        }
-    }
-}
-
-void Read(NRead::TReadPtr read, TContextPtr ctx) noexcept {
-    while(true) {
-        if (auto result = read->Read(DATASIZE); result) {
-            if (NUtils::isZero(result.value())) {
-                continue;
-            }
-            std::unique_lock ulock{ctx->mutex};
-            ctx->queue.emplace_back(std::move(result).value());
-            ulock.unlock();
-            ctx->cv.notify_one();
-        } else {
-            std::cerr << result.error().message() << std::endl;
+        if (auto ec = write->Write(std::move(data)); ec) {
+            std::cerr << "write error: " << ec.message() << std::endl;
         }
     }
 }
 
 int main() {
     NRead::TReadPtr read = std::make_unique<NRead::TSocket>(IP, PORT);
-    NWrite::TWritePtr write = std::make_unique<NWrite::TAlsa>(DEVICE, FORMAT, CHANNELS, RATE, DATASIZE);
+    NWrite::TWritePtr write = std::make_unique<NWrite::TAlsa>(DEVICE, FORMAT, CHANNELS, RATE);
     
-    if (auto ec = write->Init(); ec) {
-        std::cerr << ec.message() << std::endl;
+    if (auto ec = read->Init(); ec) {
+        std::cerr << "read init error: " << ec.message() << std::endl;
         return 1;
     }
 
-    if (auto ec = read->Init(); ec) {
-        std::cerr << ec.message() << std::endl;
+    if (auto ec = write->Init(); ec) {
+        std::cerr << "write init error: " << ec.message() << std::endl;
         return 1;
     }
 
@@ -80,8 +80,8 @@ int main() {
     std::thread tWrite(Write, std::move(write), ctx);
     std::thread tRead(Read, std::move(read), ctx);
 
-    tRead.join();
     tWrite.join();
+    tRead.join();
 
     return 0;
 }

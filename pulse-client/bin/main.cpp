@@ -24,7 +24,7 @@ void Read(NRead::TReadPtr read, TContextPtr ctx) noexcept {
             std::cerr << "read error: " << result.error().message() << std::endl;
             continue;
         } else {
-            std::unique_lock<std::mutex> ulock{ctx->mutex};
+            std::unique_lock ulock{ctx->mutex};
             ctx->queue.emplace_back(std::move(result).value());
         }
         ctx->cv.notify_one();
@@ -33,7 +33,7 @@ void Read(NRead::TReadPtr read, TContextPtr ctx) noexcept {
 
 void Write(NWrite::TWritePtr write, TContextPtr ctx) noexcept {
     while (true) {
-        std::unique_lock<std::mutex> ulock{ctx->mutex};
+        std::unique_lock ulock{ctx->mutex};
         ctx->cv.wait(ulock, [ctx] { return !ctx->queue.empty(); });
 
         auto data = std::move(ctx->queue.front());
@@ -67,5 +67,6 @@ int main() {
 
     tWrite.join();
     tRead.join();
+
     return 0;
 }
