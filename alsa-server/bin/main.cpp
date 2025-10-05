@@ -21,7 +21,7 @@ using TContextPtr = std::shared_ptr<TContext>;
 
 void Read(NRead::TReadPtr read, TContextPtr ctx) noexcept {
     while (true) {
-        if (auto result = read->Read(DATASIZE); !result) {
+        if (auto result = read->Read(); !result) {
             std::cerr << "read error: " << result.error().message() << std::endl;
             continue;
         } else {
@@ -62,7 +62,7 @@ void Write(NWrite::TWritePtr write, TContextPtr ctx) noexcept {
 }
 
 int main() {
-    NRead::TReadPtr read = std::make_unique<NRead::TSocket>(IP, PORT);
+    NRead::TReadPtr read = std::make_unique<NRead::TSocket>(IP, PORT, DATASIZE);
     NWrite::TWritePtr write = std::make_unique<NWrite::TAlsa>(DEVICE, FORMAT, CHANNELS, RATE);
     
     if (auto ec = read->Init(); ec) {

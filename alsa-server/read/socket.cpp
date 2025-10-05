@@ -9,10 +9,12 @@ namespace NRead {
 
 TSocket::TSocket(
     std::string ip,
-    std::uint16_t port
+    std::uint16_t port,
+    std::size_t dataSize
 )
 : Ip(std::move(ip))
-, Port(port) { }
+, Port(port)
+, DataSize(dataSize) { }
 
 TSocket::~TSocket() {
     close(Sockfd);
@@ -39,24 +41,20 @@ std::error_code TSocket::Init() noexcept {
     return {};
 }
 
-std::expected<TData, std::error_code> TSocket::Read(std::size_t dataSize) const noexcept {
+std::expected<TData, std::error_code> TSocket::Read() const noexcept {
     if (Sockfd < 0) {
         return std::unexpected(EErrorCode::SocketInit);
     }
 
-    if (dataSize < 1) {
+    if (DataSize < 1) {
         return TData{};
     }
 
-    TData buffer(dataSize);
+    TData buffer(DataSize, 0);
 
-    auto result = recv(Sockfd, buffer.data(), dataSize, MSG_WAITALL);
-
-    if (result < 0) {
+    if (auto result = recv(Sockfd, buffer.data(), DataSize, MSG_WAITALL); result < 0) {
         return std::unexpected(EErrorCode::Read);
-    }
-
-    if (result < static_cast<ssize_t>(dataSize)) {
+    } else if (result < static_cast<ssize_t>(DataSize)) {
         return TData{};
     }
 

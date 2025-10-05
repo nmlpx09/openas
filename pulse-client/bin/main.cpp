@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include <common/utils.h>
 #include "read/pulse.h"
 #include "write/socket.h"
 
@@ -20,10 +21,13 @@ using TContextPtr = std::shared_ptr<TContext>;
 
 void Read(NRead::TReadPtr read, TContextPtr ctx) noexcept {
     while (true) {
-        if (auto result = read->Read(DATASIZE); !result) {
+        if (auto result = read->Read(); !result) {
             std::cerr << "read error: " << result.error().message() << std::endl;
             continue;
         } else {
+            if (NUtils::isInvalid(result.value())) {
+                continue;
+            }
             std::unique_lock ulock{ctx->mutex};
             ctx->queue.emplace_back(std::move(result).value());
         }
@@ -47,7 +51,7 @@ void Write(NWrite::TWritePtr write, TContextPtr ctx) noexcept {
 }
 
 int main() {
-    NRead::TReadPtr read = std::make_unique<NRead::TPulse>(DEVICE, FORMAT, CHANNELS, RATE);
+    NRead::TReadPtr read = std::make_unique<NRead::TPulse>(DEVICE, FORMAT, CHANNELS, RATE, DATASIZE);
     NWrite::TWritePtr write = std::make_unique<NWrite::TSocket>(IP, PORT);
 
     if (auto ec = read->Init(); ec) {

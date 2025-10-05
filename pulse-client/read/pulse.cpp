@@ -7,12 +7,14 @@ TPulse::TPulse(
     std::string device,
     std::string sampleFormat,
     std::uint8_t numChannels,
-    std::uint32_t sampleRate
+    std::uint32_t sampleRate,
+    std::size_t dataSize
 )
 : Device(std::move(device))
 , SampleFormat(std::move(sampleFormat))
 , NumChannels(numChannels)
-, SampleRate(sampleRate) { }
+, SampleRate(sampleRate)
+, DataSize(dataSize) { }
 
 TPulse::~TPulse() {
     if (Simple != nullptr) {
@@ -51,8 +53,16 @@ std::error_code TPulse::Init() noexcept {
     return {};
 }
 
-std::expected<TData, std::error_code> TPulse::Read(std::size_t dataSize) const noexcept {
-    TData buffer(dataSize, 0);
+std::expected<TData, std::error_code> TPulse::Read() const noexcept {
+    if (Simple == nullptr) {
+        return std::unexpected(EErrorCode::DeviceInit);
+    }
+
+    if (DataSize < 1) {
+        return TData{};
+    }
+
+    TData buffer(DataSize, 0);
 
     if (auto result = pa_simple_read(Simple, buffer.data(), buffer.size(), nullptr); result < 0) {
         return std::unexpected(EErrorCode::Read);

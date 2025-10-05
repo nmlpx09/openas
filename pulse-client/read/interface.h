@@ -12,7 +12,7 @@ namespace NRead {
 struct TInterface {
 public:
     virtual std::error_code Init() noexcept = 0;
-    virtual std::expected<TData, std::error_code> Read(std::size_t dataSize) const noexcept = 0;
+    virtual std::expected<TData, std::error_code> Read() const noexcept = 0;
     virtual ~TInterface() {};
 };
 
