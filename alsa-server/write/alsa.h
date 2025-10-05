@@ -16,8 +16,8 @@ public:
     TAlsa(
         std::string device,
         std::string format,
-        std::size_t channels,
-        std::size_t rate
+        std::int8_t channels,
+        std::uint32_t rate
     );
     TAlsa(const TAlsa&) = delete;
     TAlsa(TAlsa&&) noexcept = default;
@@ -31,8 +31,8 @@ public:
 private:
     std::string Device;
     std::string Format;
-    std::size_t Channels = 0;
-    std::size_t Rate = 0;
+    std::int8_t Channels = 0;
+    std::uint32_t Rate = 0;
     
     snd_pcm_t* SoundDevice = nullptr;
     snd_pcm_hw_params_t* HwParams = nullptr;

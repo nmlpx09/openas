@@ -6,8 +6,8 @@ namespace NWrite {
 TAlsa::TAlsa(
     std::string device,
     std::string format,
-    std::size_t channels,
-    std::size_t rate
+    std::int8_t channels,
+    std::uint32_t rate
 )
 : Device(std::move(device))
 , Format(std::move(format))
