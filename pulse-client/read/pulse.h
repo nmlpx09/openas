@@ -33,8 +33,7 @@ private:
     std::uint32_t SampleRate = 0;
     std::size_t DataSize = 0;
 
-    pa_simple* Simple = nullptr;
-    pa_sample_spec Spec;
+    pa_simple* SoundDevice = nullptr;
 };
 
 }

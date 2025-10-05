@@ -26,17 +26,18 @@ std::error_code TAlsa::Init() noexcept {
         return EErrorCode::DeviceOpen;
     }
 
-    snd_pcm_hw_params_alloca(&HwParams);
+    snd_pcm_hw_params_t* hwParams = nullptr;
+    snd_pcm_hw_params_alloca(&hwParams);
  
-    if (auto err = snd_pcm_hw_params_any(SoundDevice, HwParams); err < 0) {
+    if (auto err = snd_pcm_hw_params_any(SoundDevice, hwParams); err < 0) {
         return EErrorCode::InitializeParameter;
     }
 
-    if (auto err = snd_pcm_hw_params_set_rate_resample(SoundDevice, HwParams, 1); err < 0) {
+    if (auto err = snd_pcm_hw_params_set_rate_resample(SoundDevice, hwParams, 1); err < 0) {
         return EErrorCode::Resampling;
     }
 
-    if (auto err = snd_pcm_hw_params_set_access(SoundDevice, HwParams, SND_PCM_ACCESS_RW_INTERLEAVED); err < 0) {
+    if (auto err = snd_pcm_hw_params_set_access(SoundDevice, hwParams, SND_PCM_ACCESS_RW_INTERLEAVED); err < 0) {
         return EErrorCode::SetAccess;
     }
 
@@ -44,7 +45,7 @@ std::error_code TAlsa::Init() noexcept {
         return EErrorCode::Channels;
     }
 
-    if (auto err = snd_pcm_hw_params_set_channels(SoundDevice, HwParams, Channels); err < 0) {
+    if (auto err = snd_pcm_hw_params_set_channels(SoundDevice, hwParams, Channels); err < 0) {
         return EErrorCode::SetChannels;
     }
 
@@ -56,7 +57,7 @@ std::error_code TAlsa::Init() noexcept {
         return EErrorCode::Format;
     }
 
-    if (auto err = snd_pcm_hw_params_set_format(SoundDevice, HwParams, format); err < 0) {
+    if (auto err = snd_pcm_hw_params_set_format(SoundDevice, hwParams, format); err < 0) {
         return EErrorCode::SetFormat;
     }
 
@@ -65,16 +66,16 @@ std::error_code TAlsa::Init() noexcept {
     }
 
     std::uint32_t rate = Rate;
-    if (auto err = snd_pcm_hw_params_set_rate_near(SoundDevice, HwParams, &rate, 0); err < 0) {
+    if (auto err = snd_pcm_hw_params_set_rate_near(SoundDevice, hwParams, &rate, 0); err < 0) {
         return EErrorCode::SetRate;
     }
 
     snd_pcm_uframes_t bufferSize = Rate * FrameSize / 100;
-    if (auto err = snd_pcm_hw_params_set_buffer_size_near(SoundDevice, HwParams, &bufferSize); err < 0) {
+    if (auto err = snd_pcm_hw_params_set_buffer_size_near(SoundDevice, hwParams, &bufferSize); err < 0) {
         return EErrorCode::SetBuffer;
     }
 
-    if (auto err = snd_pcm_hw_params(SoundDevice, HwParams); err < 0) {
+    if (auto err = snd_pcm_hw_params(SoundDevice, hwParams); err < 0) {
         return EErrorCode::SetHwParams;
     }
 

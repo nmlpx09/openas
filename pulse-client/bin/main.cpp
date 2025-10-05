@@ -1,8 +1,8 @@
 #include "config.h"
 
 #include <common/utils.h>
-#include "read/pulse.h"
-#include "write/socket.h"
+#include <read/pulse.h>
+#include <write/socket.h>
 
 #include <condition_variable>
 #include <memory>
@@ -40,7 +40,7 @@ void Write(NWrite::TWritePtr write, TContextPtr ctx) noexcept {
         std::unique_lock ulock{ctx->mutex};
         ctx->cv.wait(ulock, [ctx] { return !ctx->queue.empty(); });
 
-        auto data = std::move(ctx->queue.front());
+        auto data = ctx->queue.front();
         ctx->queue.pop_front();
         ulock.unlock();
 

@@ -35,7 +35,6 @@ private:
     std::uint32_t Rate = 0;
     
     snd_pcm_t* SoundDevice = nullptr;
-    snd_pcm_hw_params_t* HwParams = nullptr;
     std::size_t FrameSize = 1;
 };
 

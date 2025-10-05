@@ -17,9 +17,9 @@ TPulse::TPulse(
 , DataSize(dataSize) { }
 
 TPulse::~TPulse() {
-    if (Simple != nullptr) {
-        pa_simple_drain(Simple, nullptr);
-        pa_simple_free(Simple);
+    if (SoundDevice != nullptr) {
+        pa_simple_drain(SoundDevice, nullptr);
+        pa_simple_free(SoundDevice);
     }
 }
 
@@ -40,13 +40,13 @@ std::error_code TPulse::Init() noexcept {
         return EErrorCode::Rate;
     }
 
-    Spec = {
+    pa_sample_spec spec = {
         .format = format,
         .rate = SampleRate,
         .channels = NumChannels
     };
 
-    if (Simple = pa_simple_new(nullptr, "openas", PA_STREAM_RECORD, Device.c_str(), "pclient", &Spec, nullptr, nullptr, nullptr); !Simple) {
+    if (SoundDevice = pa_simple_new(nullptr, "openas", PA_STREAM_RECORD, Device.c_str(), "pclient", &spec, nullptr, nullptr, nullptr); !SoundDevice) {
         return EErrorCode::DeviceInit;
     }
 
@@ -54,7 +54,7 @@ std::error_code TPulse::Init() noexcept {
 }
 
 std::expected<TData, std::error_code> TPulse::Read() const noexcept {
-    if (Simple == nullptr) {
+    if (SoundDevice == nullptr) {
         return std::unexpected(EErrorCode::DeviceInit);
     }
 
@@ -64,7 +64,7 @@ std::expected<TData, std::error_code> TPulse::Read() const noexcept {
 
     TData buffer(DataSize, 0);
 
-    if (auto result = pa_simple_read(Simple, buffer.data(), buffer.size(), nullptr); result < 0) {
+    if (auto result = pa_simple_read(SoundDevice, buffer.data(), buffer.size(), nullptr); result < 0) {
         return std::unexpected(EErrorCode::Read);
     }
 
