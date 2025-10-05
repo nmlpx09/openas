@@ -21,7 +21,7 @@ public:
     TSocket& operator=(TSocket&&) = delete;
 
     std::error_code Init() noexcept override;
-    std::error_code Write(TData&& data) const noexcept override;
+    std::error_code Write(TData&& data) noexcept override;
 
 private:
     std::string Ip;

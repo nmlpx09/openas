@@ -34,7 +34,7 @@ std::error_code TSocket::Init() noexcept {
     return {};
 }
 
-std::error_code TSocket::Write(TData&& data) const noexcept {
+std::error_code TSocket::Write(TData&& data) noexcept {
     if (Sockfd < 0) {
         return EErrorCode::SocketInit;
     }
