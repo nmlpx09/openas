@@ -1,8 +1,9 @@
 # about
 
-open audio system c++
+open network audio player
 
-pulse-client captured audio stream from pulseaudio and received it to alsa-server
+1. pulse-client captured audio stream from pulseaudio and received it to network
+2. alsa-server aptured audio stream from network and received to alsa
 
 # requirement
 
@@ -24,7 +25,7 @@ make install
 in file default.pa `/etc/pulse/default.pa` add:
 
 `
-load-module module-null-sink sink_name=openas sink_properties=device.description=Openas
+load-module module-null-sink sink_name=opennap sink_properties=device.description=Opennap
 `
 
-and set in audio mixer default output on Openas
+and set in audio mixer default output on Opennap

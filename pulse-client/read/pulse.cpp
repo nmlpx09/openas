@@ -46,7 +46,7 @@ std::error_code TPulse::Init() noexcept {
         .channels = NumChannels
     };
 
-    if (SoundDevice = pa_simple_new(nullptr, "openas", PA_STREAM_RECORD, Device.c_str(), "pclient", &spec, nullptr, nullptr, nullptr); !SoundDevice) {
+    if (SoundDevice = pa_simple_new(nullptr, "opennap", PA_STREAM_RECORD, Device.c_str(), "pclient", &spec, nullptr, nullptr, nullptr); !SoundDevice) {
         return EErrorCode::DeviceInit;
     }
 
