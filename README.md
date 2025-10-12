@@ -3,7 +3,7 @@
 open network audio player
 
 1. pulse-client captured audio stream from pulseaudio and received it to network
-2. alsa-server aptured audio stream from network and received to alsa
+2. alsa-server aptured audio stream from network and received it to alsa
 
 # requirement
 
